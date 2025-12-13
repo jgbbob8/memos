@@ -1,0 +1,20 @@
+services:
+  memos:
+    image: neosmemo/memos:stable
+    container_name: memos
+    restart: unless-stopped
+    volumes:
+      - ~/.memos:/var/opt/memos
+    networks:
+      - traefik-network
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-network
+      - traefik.http.routers.memos.rule=Host(`memos.adego.es`)
+      - traefik.http.routers.memos.entrypoints=websecure
+      - traefik.http.routers.memos.tls=true
+      - traefik.http.routers.memos.tls.certresolver=le
+      - traefik.http.services.memos.loadbalancer.server.port=5230
+networks:
+  traefik-network:
+    external: true
