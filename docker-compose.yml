@@ -10,10 +10,23 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik-network
-      - traefik.http.routers.memos.rule=Host(`memos.adego.es`)
-      - traefik.http.routers.memos.entrypoints=websecure
-      - traefik.http.routers.memos.tls=true
-      - traefik.http.routers.memos.tls.certresolver=le
+
+      # Router HTTP (puerto 80) - NECESARIO para el challenge
+      - "traefik.http.routers.memos-http.rule=Host(`memos.adego.es`)"
+      - traefik.http.routers.memos-http.entrypoints=web
+      - traefik.http.routers.memos-http.middlewares=memos-https-redirect
+
+      # Router HTTPS (puerto 443)
+      - "traefik.http.routers.memos-https.rule=Host(`memos.adego.es`)"
+      - traefik.http.routers.memos-https.entrypoints=websecure
+      - traefik.http.routers.memos-https.tls=true
+      - traefik.http.routers.memos-https.tls.certresolver=le
+
+      # Middleware: Redirección HTTP → HTTPS
+      - traefik.http.middlewares.memos-https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.memos-https-redirect.redirectscheme.permanent=true
+
+      # Servicio (puerto interno del contenedor)
       - traefik.http.services.memos.loadbalancer.server.port=5230
 networks:
   traefik-network:
